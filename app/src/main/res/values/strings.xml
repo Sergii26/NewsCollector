@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">News Collector</string>
+    <string name="empty" />
+    <string name="empty_string" />
+    <string name="article_image">Article image</string>
 </resources>
