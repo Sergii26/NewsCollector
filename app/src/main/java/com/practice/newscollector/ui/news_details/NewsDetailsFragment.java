@@ -10,6 +10,7 @@ import com.practice.newscollector.model.dao.ArticleSchema;
 import com.practice.newscollector.model.logger.ILog;
 import com.practice.newscollector.model.logger.Logger;
 import com.practice.newscollector.ui.arch.fragments.MvpFragment;
+import com.practice.newscollector.ui.listener.EndlessScrollListener;
 
 import java.util.List;
 
@@ -54,16 +55,16 @@ public class NewsDetailsFragment extends MvpFragment<NewsDetailsContract.Present
                 .newsDetailsFragmentModule(new NewsDetailsFragmentModule())
                 .build()
                 .injectNewsDetailsFragment(this);
+        if(adapter.getItemCount() == 0){
+            Logger.withTag("MyLog").log("NewsDetailsFragment onCreateView() getInt from Bundle: " + (getArguments() != null ? getArguments().getInt(KEY_ARTICLE_ID) : -1));
+            presenter.getArticles(getArguments() != null ? getArguments().getInt(KEY_ARTICLE_ID) : -1);
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         logger.log("NewsDetailsFragment onCreateView()");
-        if(adapter.getItemCount() == 0){
-            Logger.withTag("MyLog").log("NewsDetailsFragment onCreateView() getInt from Bundle: " + (getArguments() != null ? getArguments().getInt(KEY_ARTICLE_ID) : -1));
-            presenter.getArticles(getArguments() != null ? getArguments().getInt(KEY_ARTICLE_ID) : -1);
-        }
         return inflater.inflate(R.layout.fragment_news_details, container, false);
     }
 
@@ -77,26 +78,31 @@ public class NewsDetailsFragment extends MvpFragment<NewsDetailsContract.Present
         SnapHelper snapHelper = new PagerSnapHelper();
         rvDetails.setLayoutManager(layoutManager);
         snapHelper.attachToRecyclerView(rvDetails);
+        rvDetails.addOnScrollListener(new EndlessScrollListener(false, false) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                logger.log("NewsDetailsFragment onCreateView() onScroll articles size: " + adapter.getArticlesList().size());
+                presenter.getMoreArticles(adapter.getLastArticleTime());
+            }
+        });
     }
 
     @Override
     public void onStart() {
         super.onStart();
         logger.log("NewsDetailsFragment onStart()");
-        getPresenter().setupSubscriptions();
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         unbinder.unbind();
     }
 
     @Override
     public void setArticles(List<ArticleSchema> articles) {
         logger.log("NewsDetailsFragment setArticles()");
-        adapter.setNewsList(articles);
-        adapter.notifyDataSetChanged();
+        adapter.setArticlesList(articles);
         rvDetails.scrollToPosition(adapter.getArticlesList().size() - 1);
     }
 
@@ -104,19 +110,17 @@ public class NewsDetailsFragment extends MvpFragment<NewsDetailsContract.Present
     public void addArticlesToList(List<ArticleSchema> articles) {
         logger.log("NewsDetailsFragment addArticlesToList()");
         adapter.addArticlesToList(articles);
-        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public long getLastArticleTime() {
+        return adapter.getLastArticleTime();
     }
 
     @Override
     protected NewsDetailsContract.Presenter getPresenter() {
         logger.log("NewsDetailsFragment getPresenter()");
         return presenter;
-    }
-
-    @Override
-    public Observable<Long> getReachEndObservable() {
-        logger.log("NewsDetailsFragment getReachEndObservable()");
-        return adapter.getRichEndObservable();
     }
 
 }

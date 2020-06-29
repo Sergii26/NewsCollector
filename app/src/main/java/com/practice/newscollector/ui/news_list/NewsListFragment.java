@@ -10,6 +10,7 @@ import com.practice.newscollector.model.dao.ArticleSchema;
 import com.practice.newscollector.model.logger.ILog;
 import com.practice.newscollector.model.logger.Logger;
 import com.practice.newscollector.ui.arch.fragments.MvpFragment;
+import com.practice.newscollector.ui.listener.EndlessScrollListener;
 
 
 import java.util.List;
@@ -50,17 +51,16 @@ public class NewsListFragment extends MvpFragment<NewsListContract.Presenter, Ne
                 .newsListFragmentModule(new NewsListFragmentModule())
                 .build()
                 .injectNewsListFragment(this);
+        if(adapter.getItemCount() == 0){
+            presenter.setArticlesList();
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         logger.log("NewsListFragment onCreateView()");
-        View v = inflater.inflate(R.layout.fragment_news_list, container, false);
-        if(adapter.getItemCount() == 0){
-            presenter.setArticlesList();
-        }
-        return v;
+        return inflater.inflate(R.layout.fragment_news_list, container, false);
     }
 
     @Override
@@ -71,6 +71,13 @@ public class NewsListFragment extends MvpFragment<NewsListContract.Presenter, Ne
         unbinder = ButterKnife.bind(this, view);
         rvNews.setAdapter(adapter);
         rvNews.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        rvNews.addOnScrollListener(new EndlessScrollListener(false, true) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                logger.log("NewsListFragment onCreateView() onScroll articles size: " + adapter.getArticlesList().size());
+                presenter.getMoreArticles(adapter.getLastArticleTime());
+            }
+        });
         swipeRefreshLayout.setOnRefreshListener(this);
     }
 
@@ -82,8 +89,8 @@ public class NewsListFragment extends MvpFragment<NewsListContract.Presenter, Ne
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         unbinder.unbind();
     }
 
@@ -111,11 +118,6 @@ public class NewsListFragment extends MvpFragment<NewsListContract.Presenter, Ne
     }
 
     @Override
-    public Observable<Long> getReachEndObservable() {
-        return adapter.getRichEndObservable();
-    }
-
-    @Override
     public void showNewsDetailsFragment(int articleId) {
         logger.log("NewsListFragment showNewsDetailsFragment()");
         if(hasCallBack()){
@@ -124,9 +126,8 @@ public class NewsListFragment extends MvpFragment<NewsListContract.Presenter, Ne
     }
 
     @Override
-    public void setNewsList(List<ArticleSchema> newsList) {
+    public void setArticlesList(List<ArticleSchema> newsList) {
         adapter.setArticlesList(newsList);
-        adapter.notifyDataSetChanged();
     }
 
     @Override

@@ -24,10 +24,6 @@ public class App extends MultiDexApplication {
         appComponent = DaggerAppComponent.create();
     }
 
-    public void setComponents(AppComponent appComponent){
-        this.appComponent = appComponent;
-    }
-
     public AppComponent getAppComponent(){
         return appComponent;
     }

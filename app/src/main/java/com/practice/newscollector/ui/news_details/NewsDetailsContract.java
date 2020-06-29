@@ -13,7 +13,7 @@ public interface NewsDetailsContract {
 
         void addArticlesToList(List<ArticleSchema> articles);
 
-        Observable<Long> getReachEndObservable();
+        long getLastArticleTime();
     }
 
     interface Presenter extends Contract.Presenter<NewsDetailsContract.View> {
@@ -21,7 +21,6 @@ public interface NewsDetailsContract {
 
         void getMoreArticles(long lastArticle);
 
-        void setupSubscriptions();
     }
 
     interface Host extends Contract.Host {

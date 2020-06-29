@@ -3,6 +3,7 @@ package com.practice.newscollector;
 import com.practice.newscollector.model.dao.NewsDao;
 import com.practice.newscollector.model.dao.NewsDaoWorker;
 import com.practice.newscollector.model.newtwork_api.ApiService;
+import com.practice.newscollector.model.newtwork_api.ApiWorker;
 import com.practice.newscollector.model.newtwork_api.NetworkClient;
 import com.practice.newscollector.ui.news_details.NewsDetailsFragmentModule;
 import com.practice.newscollector.ui.news_list.NewsListFragmentModule;
@@ -22,7 +23,9 @@ public interface AppComponent {
 
     NewsDaoWorker provideNewsDaoWorker();
 
-    ApiService provideNetworkService();
+    ApiService provideApiService();
 
     NetworkClient provideNetworkClient();
+
+    ApiWorker provideApiWorker();
 }

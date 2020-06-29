@@ -2,7 +2,9 @@ package com.practice.newscollector.model.dao;
 
 import com.google.common.base.Optional;
 import com.practice.newscollector.model.logger.ILog;
+import com.practice.newscollector.model.pojo.Article;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -20,21 +22,21 @@ public class NewsDatabaseWorker implements NewsDaoWorker {
     }
 
     @Override
-    public Completable insertArticle(List<ArticleSchema> articles) {
+    public Completable insertArticle(List<Article> articles) {
         logger.log("NewsDatabaseWorker insertArticle()");
-        return dao.insertArticle(articles);
+        return dao.insertArticle(convertArticles(articles));
     }
 
     @Override
-    public Single<List<ArticleSchema>> getLastArticles() {
+    public Single<List<ArticleSchema>> getFirstPage() {
         logger.log("NewsDatabaseWorker getLastArticles()");
-        return Single.fromCallable(() -> dao.getLastArticles());
+        return Single.fromCallable(() -> dao.getFirstPage());
     }
 
     @Override
-    public Single<List<ArticleSchema>> getMoreArticles(long publishedAt) {
+    public Single<List<ArticleSchema>> getNextPage(long publishedAt) {
         logger.log("NewsDatabaseWorker getMoreArticles()");
-        return Single.fromCallable(() -> dao.getMoreArticles(publishedAt));
+        return Single.fromCallable(() -> dao.getNextPage(publishedAt));
     }
 
     @Override
@@ -57,14 +59,22 @@ public class NewsDatabaseWorker implements NewsDaoWorker {
     }
 
     @Override
-    public Single<List<ArticleSchema>> getNextArticles(int articleId) {
+    public Single<List<ArticleSchema>> getArticlesStartingFrom(int articleId) {
         logger.log("NewsDatabaseWorker getNextArticles()");
         return Single.fromCallable(() -> dao.getArticleById(articleId))
-                .map(articleSchema -> dao.getNextArticles(articleSchema.getPublishedAt()));
+                .map(articleSchema -> dao.getArticleStartingFrom(articleSchema.getPublishedAt()));
     }
 
     @Override
     public Completable clearDatabase() {
         return Completable.fromCallable((Callable<Completable>) () -> dao.deleteAllArticles());
+    }
+
+    private List<ArticleSchema> convertArticles(List<Article> articles) {
+        List<ArticleSchema> convertedArticles = new ArrayList<>();
+        for (Article article : articles) {
+            convertedArticles.add(new ArticleSchema(article));
+        }
+        return convertedArticles;
     }
 }

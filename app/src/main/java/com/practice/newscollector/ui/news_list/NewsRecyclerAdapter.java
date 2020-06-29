@@ -13,6 +13,7 @@ import com.practice.newscollector.model.dao.ArticleSchema;
 import com.practice.newscollector.model.logger.Logger;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
+import rx.Subscription;
+import rx.functions.Action1;
 import rx.functions.Func1;
 
 
@@ -31,26 +34,34 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapte
 
     private final PublishSubject<Integer> itemViewClickSubject = PublishSubject.create();
 
-    private final PublishSubject<Long> reachEndSubject = PublishSubject.create();
-
-    public Observable<Integer> getClicksObservable(){
+    public Observable<Integer> getClicksObservable() {
         return itemViewClickSubject;
     }
 
-    public Observable<Long> getRichEndObservable() {
-        return reachEndSubject;
-    }
-
-    public void setArticlesList(List<ArticleSchema> articlesList){
+    public void setArticlesList(List<ArticleSchema> articlesList) {
         this.articlesList = articlesList;
+        notifyDataSetChanged();
     }
 
-    public List<ArticleSchema> getArticlesList(){
-        return articlesList;
+    public List<ArticleSchema> getArticlesList() {
+        if(articlesList == null){
+            return new ArrayList<>();
+        } else {
+            return articlesList;
+        }
     }
 
-    public void addArticlesToList(List<ArticleSchema> newArticles){
+    public long getLastArticleTime(){
+        if(articlesList != null && !articlesList.isEmpty()){
+            return articlesList.get(articlesList.size() - 1).getPublishedAt();
+        } else {
+            return 0;
+        }
+    }
+
+    public void addArticlesToList(List<ArticleSchema> newArticles) {
         articlesList.addAll(newArticles);
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -62,21 +73,32 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapte
 
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
-        if(articlesList.size() >= 20 && position > articlesList.size() - 4){
-            reachEndSubject.onNext(articlesList.get(articlesList.size() - 1).getPublishedAt());
+        if(articlesList != null){
+            holder.bindView(articlesList.get(position));
         }
-        holder.bindView(articlesList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        if(articlesList == null){
+        if (articlesList == null) {
             return 0;
         }
         return articlesList.size();
     }
 
-    class NewsViewHolder extends RecyclerView.ViewHolder{
+    @Override
+    public void onViewAttachedToWindow(@NonNull NewsViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        holder.subscribe();
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull NewsViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        holder.dispose();
+    }
+
+    class NewsViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.tvTitle)
         TextView title;
         @BindView(R.id.tvSource)
@@ -85,27 +107,38 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapte
         TextView date;
         @BindView(R.id.ivImage)
         ImageView image;
+        private View itemView;
+        private Subscription subscription;
 
-        NewsViewHolder(@NonNull View itemView) {
+        public NewsViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-            RxView.clicks(itemView)
-                    .map((Func1<Void, Integer>) aVoid -> {
-                        Logger.withTag("MyLog").log("NewsViewHolder on item click position: " + getAdapterPosition());
-                        itemViewClickSubject.onNext(articlesList.get(getAdapterPosition()).getUniqueId());
-                        return null;
-                    })
-                    .subscribe();
+            this.itemView = itemView;
+
         }
 
-        public void bindView(ArticleSchema article){
+        public void bindView(ArticleSchema article) {
             this.title.setText(article.getTitle());
             this.source.setText(article.getSource());
             this.date.setText(getBeautifulDate(article.getPublishedAtAsString()));
             Picasso.get().load(article.getUrlToImage()).into(image);
         }
 
-        private String getBeautifulDate(String date){
+        public void subscribe() {
+            subscription = RxView.clicks(itemView)
+                    .doOnNext(aVoid -> {
+                        Logger.withTag("MyLog").log("NewsViewHolder on item click position: " + getAdapterPosition());
+                        itemViewClickSubject.onNext(articlesList.get(getAdapterPosition()).getUniqueId());
+                    }).subscribe();
+        }
+
+        public void dispose() {
+            if (subscription != null) {
+                subscription.unsubscribe();
+            }
+        }
+
+        private String getBeautifulDate(String date) {
             return String.format("%s/%s/%s at %s", date.substring(0, 4), date.substring(5, 7), date.substring(8, 10), date.substring(11, 16));
         }
     }

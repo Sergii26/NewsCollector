@@ -13,8 +13,6 @@ import io.reactivex.disposables.CompositeDisposable;
 
 public abstract class MvpFragment <ControllerType extends Contract.Presenter, Host extends Contract.Host>
         extends Fragment implements Contract.View {
-    protected final CompositeDisposable onStopDisposables = new CompositeDisposable();
-    protected final CompositeDisposable onDestroyDisposables = new CompositeDisposable();
     /**
      * the fragment callBack
      */
@@ -75,7 +73,6 @@ public abstract class MvpFragment <ControllerType extends Contract.Presenter, Ho
         if (controllerType != null) {
             controllerType.unsubscribe();
         }
-        onStopDisposables.clear();
         super.onStop();
     }
 
@@ -85,7 +82,6 @@ public abstract class MvpFragment <ControllerType extends Contract.Presenter, Ho
         if (controllerType != null) {
             controllerType.destroy();
         }
-        onDestroyDisposables.clear();
         super.onDestroy();
     }
 

@@ -12,14 +12,13 @@ import com.practice.newscollector.model.logger.ILog;
 import com.practice.newscollector.model.logger.Logger;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
 
 public class DetailsRecyclerAdapter extends RecyclerView.Adapter<DetailsRecyclerAdapter.DetailsViewHolder>{
 
@@ -27,23 +26,32 @@ public class DetailsRecyclerAdapter extends RecyclerView.Adapter<DetailsRecycler
 
     private List<ArticleSchema> articlesList;
 
-    private final PublishSubject<Long> reachEndSubject = PublishSubject.create();
-
     public List<ArticleSchema> getArticlesList() {
-        return articlesList;
+        if(articlesList == null){
+            return new ArrayList<>();
+        } else {
+            return articlesList;
+        }
     }
 
-    public Observable<Long> getRichEndObservable(){
-        return  reachEndSubject;
-    }
 
-    public void setNewsList(List<ArticleSchema> articlesList) {
+    public void setArticlesList(List<ArticleSchema> articlesList) {
         this.articlesList = articlesList;
+        notifyDataSetChanged();
     }
 
     public void addArticlesToList(List<ArticleSchema> newArticles){
         logger.log("DetailsRecyclerAdapter addArticlesToList()");
         articlesList.addAll(newArticles);
+        notifyDataSetChanged();
+    }
+
+    public long getLastArticleTime(){
+        if(articlesList != null && !articlesList.isEmpty()){
+            return articlesList.get(articlesList.size() - 1).getPublishedAt();
+        } else {
+            return 0;
+        }
     }
 
     @NonNull
@@ -56,11 +64,9 @@ public class DetailsRecyclerAdapter extends RecyclerView.Adapter<DetailsRecycler
 
     @Override
     public void onBindViewHolder(@NonNull DetailsViewHolder holder, int position) {
-        logger.log("DetailsRecyclerAdapter onBindViewHolder()");
-        if(articlesList.size() < 20 || position > articlesList.size() - 4){
-            reachEndSubject.onNext(articlesList.get(articlesList.size() - 1).getPublishedAt());
+        if(articlesList != null){
+            holder.bindView(articlesList.get(position));
         }
-        holder.bindView(articlesList.get(position));
     }
 
     @Override

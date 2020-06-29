@@ -10,12 +10,11 @@ import io.reactivex.subjects.PublishSubject;
 
 public interface NewsListContract {
     interface View extends Contract.View{
-        void setNewsList(List<ArticleSchema> newsList);
+        void setArticlesList(List<ArticleSchema> newsList);
         void addArticlesToLIst(List<ArticleSchema> articles);
         void turnOffRefreshing();
         boolean isRefreshingState();
         Observable<Integer> getItemClickObservable();
-        Observable<Long> getReachEndObservable();
         void showNewsDetailsFragment(int articleId);
     }
 
@@ -26,6 +25,6 @@ public interface NewsListContract {
     }
 
     interface Host extends Contract.Host{
-        void showNewsDetailsFragment(int articleTime);
+        void showNewsDetailsFragment(int articleId);
     }
 }

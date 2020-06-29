@@ -10,17 +10,17 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public interface NewsDaoWorker {
-    Completable insertArticle(List<ArticleSchema> articles);
+    Completable insertArticle(List<Article> articles);
 
-    Single<List<ArticleSchema>> getLastArticles();
+    Single<List<ArticleSchema>> getFirstPage();
 
-    Single<List<ArticleSchema>> getMoreArticles(long publishedAt);
+    Single<List<ArticleSchema>> getNextPage(long publishedAt);
 
     Completable deleteAllArticles();
 
     Single<Optional<ArticleSchema>> getLastArticle();
 
-    Single<List<ArticleSchema>> getNextArticles(int articleId);
+    Single<List<ArticleSchema>> getArticlesStartingFrom(int articleId);
 
     Completable clearDatabase();
 

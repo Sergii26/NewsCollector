@@ -10,23 +10,15 @@ public class ApiClient implements NetworkClient{
     public static final String  BBC_SOURCE= "bbc-news";
     public static final String  INDEPENDENT_SOURCE= "independent";
 
-    private static ApiClient apiClient;
     private static final String BASE_URL = "https://newsapi.org/v2/";
     private static Retrofit retrofit = null;
 
-    private ApiClient(){
+    public ApiClient(){
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-    }
-
-    public static ApiClient getInstance() {
-        if(apiClient == null){
-            apiClient = new ApiClient();
-        }
-        return apiClient;
     }
 
     public ApiService getApiService(){

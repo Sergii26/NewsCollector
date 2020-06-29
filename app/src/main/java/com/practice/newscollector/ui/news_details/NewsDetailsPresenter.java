@@ -20,13 +20,14 @@ public class NewsDetailsPresenter extends MvpPresenter<NewsDetailsContract.View>
     @Override
     public void getArticles(int articleId) {
         logger.log("NewsDetailsPresenter getArticles()");
-        onStopDisposable.add(dbWorker.getNextArticles(articleId)
+        onStopDisposable.add(dbWorker.getArticlesStartingFrom(articleId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(articleSchema -> {
                     logger.log("NewsDetailsPresenter getArticles() size: " + articleSchema.size());
                     if (hasView()) {
                         view.setArticles(articleSchema);
+                        getMoreArticles(view.getLastArticleTime());
                     }
                 }, throwable -> logger.log("NewsDetailsPresenter getMoreArticles() error: " + throwable.getMessage())));
     }
@@ -34,7 +35,7 @@ public class NewsDetailsPresenter extends MvpPresenter<NewsDetailsContract.View>
     @Override
     public void getMoreArticles(long lastArticle) {
         logger.log("NewsDetailsPresenter getMoreArticles()");
-        onStopDisposable.add(dbWorker.getMoreArticles(lastArticle)
+        onStopDisposable.add(dbWorker.getNextPage(lastArticle)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(articleSchemas -> {
@@ -45,16 +46,4 @@ public class NewsDetailsPresenter extends MvpPresenter<NewsDetailsContract.View>
                 }, throwable -> logger.log("NewsDetailsPresenter getMoreArticles() error: " + throwable.getMessage())));
     }
 
-    @Override
-    public void setupSubscriptions() {
-        logger.log("NewsDetailsPresenter setupSubscriptions()");
-        if (hasView()) {
-            onStopDisposable.add(view.getReachEndObservable()
-                    .subscribe(publishedAt -> {
-                        if (hasView()) {
-                            getMoreArticles(publishedAt);
-                        }
-                    }));
-        }
-    }
 }
