@@ -32,11 +32,11 @@ public class DetailsRecyclerAdapter extends RecyclerView.Adapter<DetailsRecycler
 
 
     public void setArticlesList(List<ArticleSchema> articlesList) {
+        this.articlesList.clear();
         if(articlesList != null){
-            this.articlesList.clear();
             this.articlesList.addAll(articlesList);
-            notifyDataSetChanged();
         }
+        notifyDataSetChanged();
     }
 
     public void addArticlesToList(List<ArticleSchema> newArticles){
