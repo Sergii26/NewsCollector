@@ -13,7 +13,7 @@ public class ApiClient implements NetworkClient{
     public static final String  INDEPENDENT_SOURCE= "independent";
 
     private static final String BASE_URL = "https://newsapi.org/v2/";
-    private static Retrofit retrofit = null;
+    private Retrofit retrofit = null;
     private final ApiService apiService;
 
     public ApiClient(){

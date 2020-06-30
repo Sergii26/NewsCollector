@@ -30,7 +30,7 @@ import rx.functions.Func1;
 
 public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapter.NewsViewHolder> {
 
-    private List<ArticleSchema> articlesList = new ArrayList<>();
+    private final List<ArticleSchema> articlesList = new ArrayList<>();
 
     private final PublishSubject<Integer> itemViewClickSubject = PublishSubject.create();
 
@@ -39,29 +39,26 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapte
     }
 
     public void setArticlesList(List<ArticleSchema> articlesList) {
-        this.articlesList = articlesList;
-        notifyDataSetChanged();
+        if(articlesList != null){
+            this.articlesList.clear();
+            this.articlesList.addAll(articlesList);
+            notifyDataSetChanged();
+        }
     }
 
     public List<ArticleSchema> getArticlesList() {
-        if(articlesList == null){
-            return new ArrayList<>();
-        } else {
-            return articlesList;
-        }
+        return articlesList;
     }
 
     public long getLastArticleTime(){
-        if(articlesList != null && !articlesList.isEmpty()){
-            return articlesList.get(articlesList.size() - 1).getPublishedAt();
-        } else {
-            return 0;
-        }
+        return articlesList.isEmpty() ? 0 : articlesList.get(articlesList.size() - 1).getPublishedAt();
     }
 
     public void addArticlesToList(List<ArticleSchema> newArticles) {
-        articlesList.addAll(newArticles);
-        notifyDataSetChanged();
+        if(newArticles != null){
+            articlesList.addAll(newArticles);
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull
@@ -73,16 +70,11 @@ public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapte
 
     @Override
     public void onBindViewHolder(@NonNull NewsViewHolder holder, int position) {
-        if(articlesList != null){
             holder.bindView(articlesList.get(position));
-        }
     }
 
     @Override
     public int getItemCount() {
-        if (articlesList == null) {
-            return 0;
-        }
         return articlesList.size();
     }
 

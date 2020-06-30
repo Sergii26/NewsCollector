@@ -24,34 +24,31 @@ public class DetailsRecyclerAdapter extends RecyclerView.Adapter<DetailsRecycler
 
     private final ILog logger = Logger.withTag("MyLog");
 
-    private List<ArticleSchema> articlesList = new ArrayList<>();
+    private final List<ArticleSchema> articlesList = new ArrayList<>();
 
     public List<ArticleSchema> getArticlesList() {
-        if(articlesList == null){
-            return new ArrayList<>();
-        } else {
             return articlesList;
-        }
     }
 
 
     public void setArticlesList(List<ArticleSchema> articlesList) {
-        this.articlesList = articlesList;
-        notifyDataSetChanged();
+        if(articlesList != null){
+            this.articlesList.clear();
+            this.articlesList.addAll(articlesList);
+            notifyDataSetChanged();
+        }
     }
 
     public void addArticlesToList(List<ArticleSchema> newArticles){
         logger.log("DetailsRecyclerAdapter addArticlesToList()");
-        articlesList.addAll(newArticles);
-        notifyDataSetChanged();
+        if(newArticles != null) {
+            articlesList.addAll(newArticles);
+            notifyDataSetChanged();
+        }
     }
 
     public long getLastArticleTime(){
-        if(articlesList != null && !articlesList.isEmpty()){
-            return articlesList.get(articlesList.size() - 1).getPublishedAt();
-        } else {
-            return 0;
-        }
+        return articlesList.isEmpty() ? 0 : articlesList.get(articlesList.size() - 1).getPublishedAt();
     }
 
     @NonNull
@@ -64,16 +61,11 @@ public class DetailsRecyclerAdapter extends RecyclerView.Adapter<DetailsRecycler
 
     @Override
     public void onBindViewHolder(@NonNull DetailsViewHolder holder, int position) {
-        if(articlesList != null){
             holder.bindView(articlesList.get(position));
-        }
     }
 
     @Override
     public int getItemCount() {
-        if(articlesList == null){
-            return 0;
-        }
         return articlesList.size();
     }
 

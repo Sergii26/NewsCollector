@@ -24,7 +24,7 @@ public class AppModule {
 
     @Provides
     public NewsDaoWorker provideNewsDaoWorker(){
-        return new NewsDatabaseWorker(App.getInstance().getAppComponent().provideNewsDao().newsDao(), Logger.withTag("MyLog"));
+        return new NewsDatabaseWorker(provideNewsDao().newsDao(), Logger.withTag("MyLog"));
     }
 
     @Provides
@@ -32,5 +32,4 @@ public class AppModule {
     public NetworkClient provideNetworkClient(){
         return new ApiClient();
     }
-
 }
