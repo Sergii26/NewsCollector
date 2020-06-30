@@ -24,7 +24,7 @@ public class DetailsRecyclerAdapter extends RecyclerView.Adapter<DetailsRecycler
 
     private final ILog logger = Logger.withTag("MyLog");
 
-    private List<ArticleSchema> articlesList;
+    private List<ArticleSchema> articlesList = new ArrayList<>();
 
     public List<ArticleSchema> getArticlesList() {
         if(articlesList == null){

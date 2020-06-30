@@ -7,7 +7,7 @@ import com.practice.newscollector.model.dao.ArticleSchema;
 import com.practice.newscollector.model.dao.NewsDaoWorker;
 import com.practice.newscollector.model.logger.ILog;
 import com.practice.newscollector.model.newtwork_api.ApiClient;
-import com.practice.newscollector.model.newtwork_api.ApiWorker;
+import com.practice.newscollector.model.newtwork_api.NetworkClient;
 import com.practice.newscollector.model.pojo.Article;
 import com.practice.newscollector.model.utils.AndroidUtils;
 import com.practice.newscollector.ui.arch.MvpPresenter;
@@ -15,7 +15,6 @@ import com.practice.newscollector.ui.arch.MvpPresenter;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.CompletableSource;
 import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -24,12 +23,12 @@ import io.reactivex.schedulers.Schedulers;
 
 public class NewsListPresenter extends MvpPresenter<NewsListContract.View> implements NewsListContract.Presenter {
 
-    private final ApiWorker networkWorker;
+    private final NetworkClient networkClient;
     private final NewsDaoWorker dbWorker;
     private final ILog logger;
 
-    public NewsListPresenter(ApiWorker networkWorker, NewsDaoWorker dbWorker, ILog logger) {
-        this.networkWorker = networkWorker;
+    public NewsListPresenter(NetworkClient networkClient, NewsDaoWorker dbWorker, ILog logger) {
+        this.networkClient = networkClient;
         this.dbWorker = dbWorker;
         this.logger = logger;
     }
@@ -43,8 +42,8 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
                     } else {
                         if (articleSchemaOptional.isPresent()) {
                             final String sourceOfLastArticle = articleSchemaOptional.get().getSource();
-                            return networkWorker.getNewsFromDate(ApiClient.BBC_SOURCE, 100, ApiClient.API_KEY, articleSchemaOptional.get().getPublishedAtAsString())
-                                    .zipWith(networkWorker.getNewsFromDate(ApiClient.INDEPENDENT_SOURCE, 100, ApiClient.API_KEY, articleSchemaOptional.get().getPublishedAtAsString()),
+                            return networkClient.getNewsFromDate(ApiClient.BBC_SOURCE, 100, articleSchemaOptional.get().getPublishedAtAsString())
+                                    .zipWith(networkClient.getNewsFromDate(ApiClient.INDEPENDENT_SOURCE, 100, articleSchemaOptional.get().getPublishedAtAsString()),
                                             (bbcResponse, independentResponse) -> {
                                                 List<Article> articles;
                                                 if (sourceOfLastArticle.equals("BBC News")) {
@@ -63,8 +62,8 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
                                                 return articles;
                                             });
                         } else {
-                            return networkWorker.getNews(ApiClient.BBC_SOURCE, 100, ApiClient.API_KEY)
-                                    .zipWith(networkWorker.getNews(ApiClient.INDEPENDENT_SOURCE, 100, ApiClient.API_KEY),
+                            return networkClient.getNews(ApiClient.BBC_SOURCE, 100)
+                                    .zipWith(networkClient.getNews(ApiClient.INDEPENDENT_SOURCE, 100),
                                             (bbcResponse, independentResponse) -> {
                                                 List<Article> articles = bbcResponse.getArticles();
                                                 articles.addAll(independentResponse.getArticles());
@@ -78,7 +77,6 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
 
     @Override
     public void setArticlesList() {
-        dbWorker.deleteAllArticles().subscribeOn(Schedulers.io()).subscribe();
         logger.log("NewsListPresenter setArticlesList()");
         onStopDisposable.add(getNewArticles()
                 .toObservable()

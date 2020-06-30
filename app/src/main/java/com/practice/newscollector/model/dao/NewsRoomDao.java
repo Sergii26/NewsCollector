@@ -1,7 +1,5 @@
 package com.practice.newscollector.model.dao;
 
-import com.practice.newscollector.model.pojo.Article;
-
 import java.util.List;
 
 import androidx.room.Dao;

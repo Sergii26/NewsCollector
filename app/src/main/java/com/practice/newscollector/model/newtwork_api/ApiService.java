@@ -7,7 +7,6 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface ApiService{
-
     @GET("everything")
     Single<ResponseModel> getNews(@Query("sources") String source, @Query("pageSize") int pageSize, @Query("apiKey") String apiKey);
 

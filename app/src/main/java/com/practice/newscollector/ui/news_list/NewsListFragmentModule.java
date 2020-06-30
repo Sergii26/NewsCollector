@@ -18,6 +18,6 @@ public class NewsListFragmentModule {
 
     @Provides
     NewsListContract.Presenter providePresenter() {
-        return new NewsListPresenter(appComponent.provideApiWorker(), appComponent.provideNewsDaoWorker(), Logger.withTag("MyLog"));
+        return new NewsListPresenter(appComponent.provideNetworkClient(), appComponent.provideNewsDaoWorker(), Logger.withTag("MyLog"));
     }
 }

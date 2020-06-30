@@ -30,7 +30,7 @@ import rx.functions.Func1;
 
 public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapter.NewsViewHolder> {
 
-    private List<ArticleSchema> articlesList;
+    private List<ArticleSchema> articlesList = new ArrayList<>();
 
     private final PublishSubject<Integer> itemViewClickSubject = PublishSubject.create();
 
