@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">News Collector</string>
+    <string name="empty" />
+    <string name="empty_string" />
+    <string name="article_image">Article image</string>
+    <string name="turn_on_internet">No internet connection. New articles can`t be downloaded!</string>
+    <string name="empty_database">Turn on the internet for download your first article!</string>
 </resources>
