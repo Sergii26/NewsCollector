@@ -70,7 +70,7 @@ public class NewsDatabaseWorker implements NewsDaoWorker {
         return Completable.fromCallable((Callable<Completable>) () -> dao.deleteAllArticles());
     }
 
-    private List<ArticleSchema> convertArticles(List<Article> articles) {
+    public List<ArticleSchema> convertArticles(List<Article> articles) {
         List<ArticleSchema> convertedArticles = new ArrayList<>();
         for (Article article : articles) {
             convertedArticles.add(new ArticleSchema(article));

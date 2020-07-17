@@ -50,6 +50,7 @@ public class NewsListFragmentTest {
     @Test
     public void noInternetToastIsShownTest() {
         changeWiFiStatus(false);
+        waitTime(1000);
         onView(withText(R.string.turn_on_internet))
                 .inRoot(withDecorView(not(Matchers.is(rule.getActivity().getWindow().getDecorView()))))
                 .check(matches(isDisplayed()));
