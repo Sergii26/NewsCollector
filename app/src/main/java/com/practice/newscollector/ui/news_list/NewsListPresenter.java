@@ -1,7 +1,6 @@
 package com.practice.newscollector.ui.news_list;
 
 import com.google.common.base.Optional;
-import com.practice.newscollector.App;
 import com.practice.newscollector.R;
 import com.practice.newscollector.model.dao.ArticleSchema;
 import com.practice.newscollector.model.dao.NewsDaoWorker;
@@ -9,11 +8,11 @@ import com.practice.newscollector.model.logger.ILog;
 import com.practice.newscollector.model.newtwork_api.ApiClient;
 import com.practice.newscollector.model.newtwork_api.NetworkClient;
 import com.practice.newscollector.model.pojo.Article;
-import com.practice.newscollector.model.utils.AndroidUtils;
 import com.practice.newscollector.ui.arch.MvpPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Single;
 import io.reactivex.SingleSource;
@@ -34,10 +33,13 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
     }
 
     private Single<List<Article>> getNewArticles() {
-        logger.log("NewsListPresenter getNewArticles()");
+        logger.log("NewsListPresenter getNewArticles() hasView = " + hasView());
         return dbWorker.getLastArticle()
+                //Waiting for invoke subscribe method in MvpFragment
+                .delay(1, TimeUnit.SECONDS)
                 .flatMap((Function<Optional<ArticleSchema>, SingleSource<List<Article>>>) articleSchemaOptional -> {
-                    if(!AndroidUtils.isConnectedToNetwork(App.getInstance().getAppContext())){
+                    logger.log("NewsListPresenter getNewArticles() hasInternet = " + view.isConnectedToNetwork());
+                    if(!view.isConnectedToNetwork()){
                         return Single.just(new ArrayList<>());
                     } else {
                         if (articleSchemaOptional.isPresent()) {
@@ -80,31 +82,30 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
         logger.log("NewsListPresenter setArticlesList()");
         onStopDisposable.add(getNewArticles()
                 .toObservable()
-                .switchMapCompletable(articles -> dbWorker.insertArticle(articles))
+                .switchMapCompletable(dbWorker::insertArticle)
                 .andThen(dbWorker.getFirstPage())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(articleSchemas -> {
-                    logger.log("NewsListPresenter setNewsList() on set success");
+                    logger.log("NewsListPresenter setArticlesList() on set success");
                     if(hasView()) {
                         if(view.isRefreshingState()) {
                             view.turnOffRefreshing();
                         }
-                        if(AndroidUtils.isConnectedToNetwork(App.getInstance().getAppContext()) && !articleSchemas.isEmpty()) {
+                        if(view.isConnectedToNetwork() && !articleSchemas.isEmpty()) {
                             view.setArticlesList(articleSchemas);
                             return;
                         }
-                        if(!AndroidUtils.isConnectedToNetwork(App.getInstance().getAppContext()) && !articleSchemas.isEmpty()){
+                        if(!view.isConnectedToNetwork() && !articleSchemas.isEmpty()){
                             view.setArticlesList(articleSchemas);
                             view.showToast(R.string.turn_on_internet);
                             return;
                         }
-                        if(!AndroidUtils.isConnectedToNetwork(App.getInstance().getAppContext()) && articleSchemas.isEmpty()){
+                        if(!view.isConnectedToNetwork() && articleSchemas.isEmpty()){
                             view.showToast(R.string.empty_database);
                         }
                     }
-
-                }, throwable -> logger.log("NewsListPresenter setNewsList() error: " + throwable.getMessage())));
+                }, throwable -> logger.log("NewsListPresenter setArticlesList() error: " + throwable.getMessage())));
     }
 
     @Override
@@ -136,6 +137,5 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
                             }));
         }
     }
-
 
 }

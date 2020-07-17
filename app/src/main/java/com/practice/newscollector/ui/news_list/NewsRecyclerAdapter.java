@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jakewharton.rxbinding.view.RxView;
-
 import com.practice.newscollector.R;
 import com.practice.newscollector.model.dao.ArticleSchema;
 import com.practice.newscollector.model.logger.Logger;
@@ -18,14 +17,11 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import rx.Subscription;
-import rx.functions.Action1;
-import rx.functions.Func1;
 
 
 public class NewsRecyclerAdapter extends RecyclerView.Adapter<NewsRecyclerAdapter.NewsViewHolder> {

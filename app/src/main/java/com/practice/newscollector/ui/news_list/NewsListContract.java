@@ -6,7 +6,6 @@ import com.practice.newscollector.ui.arch.Contract;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
 
 public interface NewsListContract {
     interface View extends Contract.View{
@@ -16,6 +15,8 @@ public interface NewsListContract {
         boolean isRefreshingState();
         Observable<Integer> getItemClickObservable();
         void showNewsDetailsFragment(int articleId);
+        boolean isConnectedToNetwork();
+        List<ArticleSchema> getArticles();
     }
 
     interface Presenter extends Contract.Presenter<View>{

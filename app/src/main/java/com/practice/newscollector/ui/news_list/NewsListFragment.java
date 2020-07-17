@@ -9,6 +9,7 @@ import com.practice.newscollector.R;
 import com.practice.newscollector.model.dao.ArticleSchema;
 import com.practice.newscollector.model.logger.ILog;
 import com.practice.newscollector.model.logger.Logger;
+import com.practice.newscollector.model.utils.AndroidUtils;
 import com.practice.newscollector.ui.arch.fragments.MvpFragment;
 import com.practice.newscollector.ui.listener.EndlessScrollListener;
 
@@ -134,6 +135,16 @@ public class NewsListFragment extends MvpFragment<NewsListContract.Presenter, Ne
     public void addArticlesToLIst(List<ArticleSchema> articles) {
         logger.log("NewsListFragment addArticlesToLIst()");
         adapter.addArticlesToList(articles);
+    }
+
+    @Override
+    public boolean isConnectedToNetwork() {
+        return AndroidUtils.isConnectedToNetwork(requireActivity());
+    }
+
+    @Override
+    public List<ArticleSchema> getArticles() {
+        return adapter.getArticlesList();
     }
 
     @Override
