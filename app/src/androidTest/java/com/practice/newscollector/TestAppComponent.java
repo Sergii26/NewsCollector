@@ -12,8 +12,8 @@ import javax.inject.Singleton;
 import dagger.Component;
 
 @Singleton
-@Component(modules = {AppModule.class})
-public interface AppComponent {
+@Component(modules = {TestAppModule.class})
+public interface TestAppComponent extends AppComponent {
     void injectNewsListFragment(NewsListFragmentModule module);
 
     void injectNewsDetailsFragment(NewsDetailsFragmentModule module);
@@ -25,4 +25,5 @@ public interface AppComponent {
     NetworkClient provideNetworkClient();
 
     Utils provideUtils();
+
 }

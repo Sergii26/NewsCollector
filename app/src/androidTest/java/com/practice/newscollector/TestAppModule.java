@@ -7,7 +7,7 @@ import com.practice.newscollector.model.dao.NewsDatabaseWorker;
 import com.practice.newscollector.model.logger.Logger;
 import com.practice.newscollector.model.newtwork_api.ApiClient;
 import com.practice.newscollector.model.newtwork_api.NetworkClient;
-import com.practice.newscollector.model.utils.AndroidUtils;
+import com.practice.newscollector.model.utils.TestAndroidUtils;
 import com.practice.newscollector.model.utils.Utils;
 
 import javax.inject.Singleton;
@@ -16,8 +16,7 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class AppModule {
-
+public class TestAppModule {
     @Provides
     @Singleton
     public NewsDao provideNewsDao() {
@@ -37,6 +36,6 @@ public class AppModule {
 
     @Provides
     public Utils provideUtils(){
-        return new AndroidUtils(App.getInstance().getAppContext());
+        return new TestAndroidUtils();
     }
 }

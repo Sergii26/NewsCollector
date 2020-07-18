@@ -27,4 +27,8 @@ public class App extends MultiDexApplication {
     public AppComponent getAppComponent(){
         return appComponent;
     }
+
+    public void setAppComponent(AppComponent component){
+        this.appComponent = component;
+    }
 }

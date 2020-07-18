@@ -1,5 +1,7 @@
 package com.practice.newscollector.ui.arch;
 
+import com.practice.newscollector.model.logger.Logger;
+
 import androidx.annotation.CallSuper;
 import io.reactivex.disposables.CompositeDisposable;
 
