@@ -15,7 +15,6 @@ public interface NewsListContract {
         boolean isRefreshingState();
         Observable<Integer> getItemClickObservable();
         void showNewsDetailsFragment(int articleId);
-        boolean isConnectedToNetwork();
         List<ArticleSchema> getArticles();
     }
 

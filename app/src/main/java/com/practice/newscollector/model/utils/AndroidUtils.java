@@ -4,11 +4,13 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-public class AndroidUtils {
-    private AndroidUtils() {
+public class AndroidUtils implements Utils{
+    private final Context context;
+    public AndroidUtils(Context context) {
+        this.context = context;
     }
 
-    public static boolean isConnectedToNetwork(Context context) {
+    public boolean isConnectedToNetwork() {
         final ConnectivityManager connectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         boolean isConnected = false;

@@ -1,38 +1,23 @@
 package com.practice.newscollector.ui.news_list;
 
-import android.content.Context;
-import android.net.wifi.WifiManager;
-
 import com.practice.newscollector.R;
 import com.practice.newscollector.rule.NewsFragmentRule;
 import com.practice.newscollector.test_utils.TestInstruments;
 import com.practice.newscollector.ui.MainActivity;
 
-import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.Objects;
-
 import androidx.test.espresso.ViewInteraction;
-import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.test.uiautomator.By;
-import androidx.test.uiautomator.UiDevice;
-import androidx.test.uiautomator.UiObject;
-import androidx.test.uiautomator.UiObjectNotFoundException;
-import androidx.test.uiautomator.UiSelector;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.swipeDown;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition;
-import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.practice.newscollector.test_utils.TestInstruments.waitTime;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
 public class NewsListFragmentTest {
@@ -47,6 +32,7 @@ public class NewsListFragmentTest {
         ViewInteraction view = onView(allOf(withId(R.id.rvNews), isDisplayed()));
         for (int i = 0; i < 20; i++) {
             view.perform(scrollToPosition(i));
+            waitTime(100);
             view.check(matches(TestInstruments.atPosition(i, hasDescendant(withId(R.id.tvTitle)))));
             view.check(matches(TestInstruments.atPosition(i, hasDescendant(withId(R.id.tvDate)))));
             view.check(matches(TestInstruments.atPosition(i, hasDescendant(withId(R.id.tvSource)))));
@@ -55,29 +41,9 @@ public class NewsListFragmentTest {
     }
 
     @Test
-    public void noInternetToastIsShownTest() {
-        switchAirplaneMode();
-        waitTime(1000);
-        onView(withId(R.id.rvNews)).perform(swipeDown());
-        onView(withText(R.string.turn_on_internet))
-                .inRoot(withDecorView(not(Matchers.is(rule.getActivity().getWindow().getDecorView()))))
-                .check(matches(isDisplayed()));
-        switchAirplaneMode();
-        waitTime(5000);
-    }
-
-    @Test
     public void refreshingBySwipeTest() {
         onView(withId(R.id.swipeRefresh))
                 .perform(TestInstruments.withCustomConstraints(swipeDown(), isDisplayed()));
     }
 
-    public void switchAirplaneMode() {
-        final String airplaneMode = "Airplane mode";
-        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        device.openQuickSettings();
-        device.findObject(By.desc(airplaneMode)).click();
-        device.pressBack();
-        device.pressBack();
-    }
 }

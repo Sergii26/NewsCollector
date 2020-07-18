@@ -9,15 +9,21 @@ import com.practice.newscollector.model.newtwork_api.ApiClient;
 import com.practice.newscollector.model.newtwork_api.NetworkClient;
 import com.practice.newscollector.model.pojo.Article;
 import com.practice.newscollector.model.pojo.SourceModel;
+import com.practice.newscollector.model.utils.Utils;
 import com.practice.newscollector.ui.arch.MvpPresenter;
+
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -26,11 +32,13 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
     private final NetworkClient networkClient;
     private final NewsDaoWorker dbWorker;
     private final ILog logger;
+    private final Utils androidUtils;
 
-    public NewsListPresenter(NetworkClient networkClient, NewsDaoWorker dbWorker, ILog logger) {
+    public NewsListPresenter(NetworkClient networkClient, NewsDaoWorker dbWorker, ILog logger, Utils androidUtils) {
         this.networkClient = networkClient;
         this.dbWorker = dbWorker;
         this.logger = logger;
+        this.androidUtils = androidUtils;
     }
 
     private Single<List<Article>> getNewArticles() {
@@ -39,8 +47,8 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
                 //Waiting for invoke subscribe method in MvpFragment
                 .delay(1, TimeUnit.SECONDS)
                 .flatMap((Function<Optional<ArticleSchema>, SingleSource<List<Article>>>) articleSchemaOptional -> {
-                    logger.log("NewsListPresenter getNewArticles() hasInternet = " + view.isConnectedToNetwork());
-                    if(!view.isConnectedToNetwork()){
+                    logger.log("NewsListPresenter getNewArticles() hasInternet = " + androidUtils.isConnectedToNetwork());
+                    if(!androidUtils.isConnectedToNetwork()){
                         return Single.just(new ArrayList<>());
                     } else {
                         if (articleSchemaOptional.isPresent()) {
@@ -93,16 +101,16 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
                         if(view.isRefreshingState()) {
                             view.turnOffRefreshing();
                         }
-                        if(view.isConnectedToNetwork() && !articleSchemas.isEmpty()) {
+                        if(androidUtils.isConnectedToNetwork() && !articleSchemas.isEmpty()) {
                             view.setArticlesList(articleSchemas);
                             return;
                         }
-                        if(!view.isConnectedToNetwork() && !articleSchemas.isEmpty()){
+                        if(!androidUtils.isConnectedToNetwork() && !articleSchemas.isEmpty()){
                             view.setArticlesList(articleSchemas);
                             view.showToast(R.string.turn_on_internet);
                             return;
                         }
-                        if(!view.isConnectedToNetwork() && articleSchemas.isEmpty()){
+                        if(!androidUtils.isConnectedToNetwork() && articleSchemas.isEmpty()){
                             view.showToast(R.string.empty_database);
                         }
                     }

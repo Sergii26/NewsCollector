@@ -11,6 +11,7 @@ import com.google.common.base.Optional;
 import com.practice.newscollector.model.pojo.Article;
 import com.practice.newscollector.model.pojo.ResponseModel;
 import com.practice.newscollector.model.pojo.SourceModel;
+import com.practice.newscollector.model.utils.Utils;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,6 +37,7 @@ public class NewsListPresenterTest {
     private NewsDaoWorker dbWorker;
     private ILog logger;
     private NewsListContract.View view;
+    private Utils androidUtils;
     private NewsListContract.Presenter presenter;
 
     @BeforeClass
@@ -50,7 +52,8 @@ public class NewsListPresenterTest {
         dbWorker = Mockito.mock(NewsDaoWorker.class);
         logger = Mockito.mock(ILog.class);
         view = Mockito.mock(NewsListFragment.class);
-        presenter = new NewsListPresenter(networkClient, dbWorker, logger);
+        androidUtils = Mockito.mock(Utils.class);
+        presenter = new NewsListPresenter(networkClient, dbWorker, logger, androidUtils);
         presenter.subscribe(view);
     }
 
@@ -63,7 +66,7 @@ public class NewsListPresenterTest {
         ResponseModel respModel = new ResponseModel();
         respModel.setArticles(articles);
 
-        when(view.isConnectedToNetwork()).thenReturn(true);
+        when(androidUtils.isConnectedToNetwork()).thenReturn(true);
         when(dbWorker.getLastArticle()).thenReturn(Single.just(Optional.of(article)));
         when(networkClient.getNewsFromDate(ApiClient.BBC_SOURCE, 100, ""))
                 .thenReturn(Single.just(respModel));
@@ -81,7 +84,7 @@ public class NewsListPresenterTest {
         }
 
         verify(dbWorker).getLastArticle();
-        verify(view, Mockito.times(3)).isConnectedToNetwork();
+        verify(androidUtils, Mockito.times(3)).isConnectedToNetwork();
         verify(networkClient).getNewsFromDate(ApiClient.BBC_SOURCE, 100, "");
         verify(networkClient).getNewsFromDate(ApiClient.INDEPENDENT_SOURCE, 100, "");
         verify(dbWorker).insertArticle(Mockito.any());
@@ -97,7 +100,7 @@ public class NewsListPresenterTest {
         ArticleSchema article = new ArticleSchema(0, "", "", "",
                 "", "", 0, "", "");
         List<ArticleSchema> articleSchemas = getArticleSchemaTestList();
-        when(view.isConnectedToNetwork()).thenReturn(false);
+        when(androidUtils.isConnectedToNetwork()).thenReturn(false);
         when(dbWorker.getLastArticle()).thenReturn(Single.just(Optional.of(article)));
         when(dbWorker.insertArticle(Mockito.any())).thenReturn(Completable.complete());
         when(dbWorker.getFirstPage()).thenReturn(Single.just(articleSchemas));
@@ -111,7 +114,7 @@ public class NewsListPresenterTest {
         }
 
         verify(dbWorker).getLastArticle();
-        verify(view, Mockito.times(4)).isConnectedToNetwork();
+        verify(androidUtils, Mockito.times(4)).isConnectedToNetwork();
         verify(dbWorker).insertArticle(Mockito.any());
         verify(dbWorker).getFirstPage();
         verify(view).isRefreshingState();
@@ -128,7 +131,7 @@ public class NewsListPresenterTest {
         ResponseModel respModel = new ResponseModel();
         respModel.setArticles(articles);
 
-        when(view.isConnectedToNetwork()).thenReturn(true);
+        when(androidUtils.isConnectedToNetwork()).thenReturn(true);
         when(dbWorker.getLastArticle()).thenReturn(Single.just(Optional.absent()));
         when(networkClient.getNews(ApiClient.BBC_SOURCE, 100))
                 .thenReturn(Single.just(respModel));
@@ -146,7 +149,7 @@ public class NewsListPresenterTest {
         }
 
         verify(dbWorker).getLastArticle();
-        verify(view, Mockito.times(3)).isConnectedToNetwork();
+        verify(androidUtils, Mockito.times(3)).isConnectedToNetwork();
         verify(networkClient).getNews(ApiClient.BBC_SOURCE, 100);
         verify(networkClient).getNews(ApiClient.INDEPENDENT_SOURCE, 100);
         verify(dbWorker).insertArticle(Mockito.any());
@@ -159,7 +162,7 @@ public class NewsListPresenterTest {
 
     @Test
     public void setArticlesListTest_withoutInternetAndEmptyDatabase(){
-        when(view.isConnectedToNetwork()).thenReturn(false);
+        when(androidUtils.isConnectedToNetwork()).thenReturn(false);
         when(dbWorker.getLastArticle()).thenReturn(Single.just(Optional.absent()));
         when(dbWorker.insertArticle(Mockito.any())).thenReturn(Completable.complete());
         when(dbWorker.getFirstPage()).thenReturn(Single.just(new ArrayList<>()));
@@ -173,7 +176,7 @@ public class NewsListPresenterTest {
         }
 
         verify(dbWorker).getLastArticle();
-        verify(view, Mockito.times(5)).isConnectedToNetwork();
+        verify(androidUtils, Mockito.times(5)).isConnectedToNetwork();
         verify(dbWorker).insertArticle(Mockito.any());
         verify(dbWorker).getFirstPage();
         verify(view).isRefreshingState();
@@ -239,5 +242,6 @@ public class NewsListPresenterTest {
         verifyNoMoreInteractions(networkClient);
         verifyNoMoreInteractions(dbWorker);
         verifyNoMoreInteractions(view);
+        verifyNoMoreInteractions(androidUtils);
     }
 }
