@@ -80,9 +80,6 @@ public class NewsListPresenter extends MvpPresenter<NewsListContract.View> imple
 
     @Override
     public void setArticlesList() {
-        ArticleSchema art = new ArticleSchema(new Article(new SourceModel("test"), "test", "test", "test",
-                "test", "2020-07-17T16:52:37Z", "test"));
-        logger.log("NewsListPresenter setArticlesList() 2020-07-17T16:52:37Z == " + art.getPublishedAt());
         logger.log("NewsListPresenter setArticlesList()");
         onStopDisposable.add(getNewArticles()
                 .toObservable()

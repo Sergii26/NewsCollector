@@ -15,6 +15,12 @@ import org.junit.Test;
 import java.util.Objects;
 
 import androidx.test.espresso.ViewInteraction;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject;
+import androidx.test.uiautomator.UiObjectNotFoundException;
+import androidx.test.uiautomator.UiSelector;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.swipeDown;
@@ -30,6 +36,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.AllOf.allOf;
 
 public class NewsListFragmentTest {
+
     @Rule
     public NewsFragmentRule rule = new NewsFragmentRule(MainActivity.class);
 
@@ -49,12 +56,14 @@ public class NewsListFragmentTest {
 
     @Test
     public void noInternetToastIsShownTest() {
-        changeWiFiStatus(false);
+        switchAirplaneMode();
         waitTime(1000);
+        onView(withId(R.id.rvNews)).perform(swipeDown());
         onView(withText(R.string.turn_on_internet))
                 .inRoot(withDecorView(not(Matchers.is(rule.getActivity().getWindow().getDecorView()))))
                 .check(matches(isDisplayed()));
-        changeWiFiStatus(true);
+        switchAirplaneMode();
+        waitTime(5000);
     }
 
     @Test
@@ -63,12 +72,12 @@ public class NewsListFragmentTest {
                 .perform(TestInstruments.withCustomConstraints(swipeDown(), isDisplayed()));
     }
 
-    public void changeWiFiStatus(Boolean enable) {
-        WifiManager wifiManager = (WifiManager) rule.getActivity().getSystemService(Context.WIFI_SERVICE);
-        Objects.requireNonNull(wifiManager).setWifiEnabled(enable);
-        if(enable){
-            //wait for switching connection
-            waitTime(5000);
-        }
+    public void switchAirplaneMode() {
+        final String airplaneMode = "Airplane mode";
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        device.openQuickSettings();
+        device.findObject(By.desc(airplaneMode)).click();
+        device.pressBack();
+        device.pressBack();
     }
 }

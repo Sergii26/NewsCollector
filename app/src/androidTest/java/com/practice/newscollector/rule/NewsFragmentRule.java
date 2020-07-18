@@ -9,7 +9,11 @@ import com.practice.newscollector.ui.news_list.NewsListFragment;
 import java.util.List;
 
 import androidx.fragment.app.Fragment;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObjectNotFoundException;
+import androidx.test.uiautomator.UiSelector;
 
 public class NewsFragmentRule<T extends Activity> extends ActivityTestRule {
     public NewsFragmentRule(Class activityClass) {
@@ -22,4 +26,5 @@ public class NewsFragmentRule<T extends Activity> extends ActivityTestRule {
         NewsListFragment newsFragment = (NewsListFragment)fragments.get(fragments.size()-1);
         return newsFragment.getArticles();
     }
+
 }
